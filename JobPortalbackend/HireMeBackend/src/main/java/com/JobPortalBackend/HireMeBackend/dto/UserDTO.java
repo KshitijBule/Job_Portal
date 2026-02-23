@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 @AllArgsConstructor
 public class UserDTO {
 
-    private String id;
+    private Long id;
     @NotBlank(message = "{user.name.absent}")
     private String name;
     @NotBlank(message = "{user.email.absent}")

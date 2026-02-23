@@ -28,6 +28,7 @@
     "@types/node": "^16.18.126",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
+    "axios": "^1.13.5",
     "dayjs": "^1.11.19",
     "dompurify": "^3.3.1",
     "embla-carousel-react": "^8.6.0",

@@ -1,8 +1,10 @@
 import { Anchor, Button, Checkbox, Group, PasswordInput, Radio, rem, TextInput } from "@mantine/core";
-import { IconAt, IconLock, icons } from "@tabler/icons-react";
+import { IconAt, IconCheck, IconLock, icons, IconX } from "@tabler/icons-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { registerUser } from "../Services/UserService";
+import { signupValidation } from "../Services/FormValidation";
+import { notifications } from "@mantine/notifications";
 
 const form={
     name:"",
@@ -15,22 +17,92 @@ const form={
 
 const SignUp=()=>{
 
-  const [data,setData] = useState(form);
+  const navigate = useNavigate();
+
+  const [formError, setFormError] = useState<{[key:string]:string}>(form);
+
+
+  const [data,setData] = useState<{[key:string]:string}>(form);
     const handleChange = (event: any) => {
     if (typeof event === "string") {
       setData({ ...data, accountType: event });
-    } else {
-      setData({ ...data, [event.target.name]: event.target.value });
-    }
+      return;
+    } 
+    let name=event.target.name, value=event.target.value
+      setData({ ...data, [name]: value });
+      setFormError({...formError,[name]:signupValidation(name,value)})
+
+      // thoda extra checking ki agar confirm pasword k baad password edit hua to validate karna chahiye
+      if(name==="password" && data.confirmPassword!==""){
+        let err="";
+        if(data.confirmPassword!==value) err="Passwords do not match";
+          
+              
+              setFormError({...formError,[name]:signupValidation(name,value),confirmPassword:err})
+
+          
+      }
+
+      // normal confirm password and password checking
+      if(name==="confirmPassword"){
+        if(data.password!==value)setFormError({...formError,[name]:"Passwords do not match"})
+          else{
+            setFormError({...formError,confirmPassword:""});
+          }
+      }
+    
   };
 
   const handleSubmit = () => {
+  let valid = true, newFormError: { [key: string]: string } = {};
+
+  for (let key in data) {
+    if (key === "accountType") continue;
+
+    if (key !== "confirmPassword")
+      newFormError[key] = signupValidation(key, data[key]);
+    else if (data[key] !== data["password"])
+      newFormError[key] = "Password do not match.";
+
+    if (newFormError[key]) valid = false;
+  }
+
+  setFormError(newFormError);
+  console.log(valid);
+
+  if (valid === true) {
     console.log("Submitting:", data);
 
     registerUser(data)
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err));
-  };
+      .then((res) => {
+        console.log(res);
+        setData(form);
+
+        notifications.show({
+          title: "Registered Succesfully",
+          message: "Redirecting to Login Page...",
+          color: "green",
+          icon:<IconCheck style={{width:"90%",height:"90%"}}/>,
+          withCloseButton: true,
+        });
+
+        setTimeout(()=>{
+            navigate("/login");
+        },3000)
+      })
+      .catch((err) => {
+        console.log(err);
+
+        notifications.show({
+          title: "Registration Failed",
+          message: err.response.data.errorMessage,
+          color: "red",
+          icon:<IconX style={{width:"90%",height:"90%"}}/>,
+          withCloseButton: true,
+        });
+      });
+  }
+};
   
 
   const [value, setValue] = useState('react');
@@ -42,6 +114,7 @@ const SignUp=()=>{
         label="Name"
         value={data.name}
         name="name"
+        error={formError.name}
         onChange={handleChange}
         placeholder="Your name"
         />
@@ -52,13 +125,14 @@ const SignUp=()=>{
         label="Email"
         value={data.email}
         name="email"
+        error={formError.email}
         onChange={handleChange}
         placeholder="Your email"
         />
         <PasswordInput withAsterisk leftSection={<IconLock style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
-       } label="Password" value={data.password} name="password" onChange={handleChange} placeholder="Enter password"/>
+       } label="Password" value={data.password} name="password" error={formError.password} onChange={handleChange} placeholder="Enter password"/>
         <PasswordInput withAsterisk leftSection={<IconLock style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
-        } label="Confirm Password" value={data.confirmPassword} name="confirmPassword" onChange={handleChange} placeholder="Enter confirmed password"/>
+        } label="Confirm Password" value={data.confirmPassword} name="confirmPassword" error={formError.confirmPassword} onChange={handleChange} placeholder="Enter confirmed password"/>
 
         <Radio.Group 
           value={data.accountType}
@@ -80,7 +154,9 @@ const SignUp=()=>{
         }
        />
        <Button onClick={handleSubmit} autoContrast variant="filled">SignUp</Button>
-       <div className="mx-auto">Have an account ? <Link to="/login" className="text-bright-sun-400 hover:underline">Login</Link></div>
+       <div className="mx-auto">Have an account ? <span
+          className="text-bright-sun-400 hover:underline cursor-pointer"
+          onClick={() => { navigate("/login"); setFormError(form); setData(form); }}>Login</span></div>
 
 
 

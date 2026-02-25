@@ -5,6 +5,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../Services/UserService";
 import { loginValidation } from "../Services/FormValidation";
 import { notifications } from "@mantine/notifications";
+import { useDisclosure } from "@mantine/hooks";
+import ResetPassword from "./ResetPasword";
 
 const form={
     email:"",
@@ -21,6 +23,7 @@ const [data,setData] =useState<{[key:string]:string}>(form);
     
   };
 
+const [opened, { open, close }] = useDisclosure(false);
   
 
 const [formError, setFormError] = useState<{[key:string]:string}>(form);
@@ -86,7 +89,7 @@ const navigate = useNavigate();
 
 
 
-  return <div className="w-1/2 px-20 flex flex-col justify-center gap-3">
+  return <><div className="w-1/2 px-20 flex flex-col justify-center gap-3">
         <div className="text-2xl font-semibold">Login</div>
         
         <TextInput
@@ -106,8 +109,10 @@ const navigate = useNavigate();
        <Button onClick={handleSubmit} autoContrast variant="filled">Login</Button>
        <div className="mx-auto">Don't have an account ? <span onClick={() => { navigate("/signup"); setFormError(form); setData(form); }} className="text-bright-sun-400 hover:underline cursor-pointer">SignUp</span></div>
 
-
+        <div onClick={open} className="text-bright-sun-400 hover:underline cursor-pointer text-center">Forget Password?</div>
 
   </div>
+  <ResetPassword opened={opened} close={close}/>
+  </>
 }
 export default Login;

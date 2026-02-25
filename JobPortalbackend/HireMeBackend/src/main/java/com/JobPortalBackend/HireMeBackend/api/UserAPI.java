@@ -1,10 +1,13 @@
 package com.JobPortalBackend.HireMeBackend.api;
 
 import com.JobPortalBackend.HireMeBackend.dto.LoginDTO;
+import com.JobPortalBackend.HireMeBackend.dto.ResponseDTO;
 import com.JobPortalBackend.HireMeBackend.dto.UserDTO;
 import com.JobPortalBackend.HireMeBackend.exception.JobPortalException;
 import com.JobPortalBackend.HireMeBackend.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -33,4 +36,21 @@ public class UserAPI {
         return new ResponseEntity<>(userService.loginUser(loginDTO), HttpStatus.OK);
     }
 
+    @PostMapping("/sendOtp/{email}")
+    public ResponseEntity<ResponseDTO> sendOtp(@PathVariable @Email(message="{user.email.invalid}")String email) throws Exception {
+        userService.sendOtp(email);
+        return new ResponseEntity<>(new ResponseDTO("OTP sent successfully"), HttpStatus.OK);
+    }
+
+    @GetMapping("/verifyOtp/{email}/{otp}")
+    public ResponseEntity<ResponseDTO> verifyOtp(@PathVariable @Email(message="{user.email.invalid}") String email,@PathVariable @Pattern(regexp="^[0-9]{6}$" ,message="{otp.invalid}") String otp) throws JobPortalException {
+        userService.verifyOtp(email,otp);
+        return new ResponseEntity<>(new ResponseDTO("OTP verified"), HttpStatus.OK);
+    }
+
+
+    @PostMapping("/changePass")
+    public ResponseEntity<ResponseDTO> changePassword(@RequestBody @Valid LoginDTO loginDTO) throws JobPortalException {
+        return new ResponseEntity<>(userService.changePassword(loginDTO), HttpStatus.OK);
+    }
 }

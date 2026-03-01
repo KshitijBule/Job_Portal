@@ -1,4 +1,4 @@
-import { Anchor, Button, Checkbox, PasswordInput, rem, TextInput } from "@mantine/core";
+import { Anchor, Button, Checkbox, LoadingOverlay, PasswordInput, rem, TextInput } from "@mantine/core";
 import { IconAt, IconCheck, IconLock, IconX } from "@tabler/icons-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,6 +7,8 @@ import { loginValidation } from "../Services/FormValidation";
 import { notifications } from "@mantine/notifications";
 import { useDisclosure } from "@mantine/hooks";
 import ResetPassword from "./ResetPasword";
+import { useDispatch } from "react-redux";
+import { setUser } from "../Slices/UserSlice";
 
 const form={
     email:"",
@@ -14,6 +16,10 @@ const form={
     }
 
 const Login=()=>{
+
+  const [loading,setLoading] = useState(false);
+
+  const dispatch=useDispatch();
 
 
 const [data,setData] =useState<{[key:string]:string}>(form);
@@ -32,6 +38,7 @@ const navigate = useNavigate();
 
 
   const handleSubmit = () => {
+    
     let valid = true, newFormError: { [key: string]: string } = {};
 
   for (let key in data) {
@@ -46,6 +53,7 @@ const navigate = useNavigate();
 
   setFormError(newFormError);
   if(valid){
+    setLoading(true);
     console.log("Submitting:", data);
 
 
@@ -64,11 +72,14 @@ const navigate = useNavigate();
               });
       
               setTimeout(()=>{
+                  setLoading(false);
+                  dispatch(setUser(res));
                   navigate("/");
               },3000)
             })
       
       .catch((err) => {
+        setLoading(false);
         console.log(err);
 
         notifications.show({
@@ -89,7 +100,13 @@ const navigate = useNavigate();
 
 
 
-  return <><div className="w-1/2 px-20 flex flex-col justify-center gap-3">
+  return <><LoadingOverlay
+          visible={loading}
+          zIndex={1000}
+          overlayProps={{ radius: 'sm', blur: 2 }}
+          loaderProps={{ color: 'yellow.4', type: 'bars' }}
+        />
+  <div className="w-1/2 px-20 flex flex-col justify-center gap-3">
         <div className="text-2xl font-semibold">Login</div>
         
         <TextInput
@@ -106,7 +123,7 @@ const navigate = useNavigate();
         <PasswordInput withAsterisk leftSection={<IconLock style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
        } label="Password" value={data.password} name="password"   error={formError.password} onChange={handleChange} placeholder="Enter password"/>
        
-       <Button onClick={handleSubmit} autoContrast variant="filled">Login</Button>
+       <Button loading={loading} onClick={handleSubmit} autoContrast variant="filled">Login</Button>
        <div className="mx-auto">Don't have an account ? <span onClick={() => { navigate("/signup"); setFormError(form); setData(form); }} className="text-bright-sun-400 hover:underline cursor-pointer">SignUp</span></div>
 
         <div onClick={open} className="text-bright-sun-400 hover:underline cursor-pointer text-center">Forget Password?</div>

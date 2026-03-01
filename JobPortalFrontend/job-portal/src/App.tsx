@@ -25,6 +25,9 @@ import JobHistoryPage from './Pages/JobHistoryPage';
 import SignUpPage from './Pages/SignUpPage';
 import ProfilePage from './Pages/ProfilePage';
 import { Notifications } from '@mantine/notifications';
+import { Provider } from 'react-redux';
+import Store from './Store';
+import AppRoutes from './Pages/AppRoutes';
 
 
 
@@ -48,9 +51,10 @@ function App() {
 });
   
   return (
+    <Provider store={Store}>
      <MantineProvider defaultColorScheme='dark' theme={theme} >
       <Notifications position="top-center" zIndex={1000}/>
-      <BrowserRouter>
+      {/* <BrowserRouter>
       <div className='relative'>
       <Header/>
       <Routes>
@@ -75,9 +79,11 @@ function App() {
 
       <Footer/>
       </div>
-      </BrowserRouter>
+      </BrowserRouter> */}
+    <AppRoutes/>
       
     </MantineProvider>
+    </Provider>
   );
 }
 

@@ -1,4 +1,4 @@
-import { Anchor, Button, Checkbox, Group, PasswordInput, Radio, rem, TextInput } from "@mantine/core";
+import { Anchor, Button, Checkbox, Group, LoadingOverlay, PasswordInput, Radio, rem, TextInput } from "@mantine/core";
 import { IconAt, IconCheck, IconLock, icons, IconX } from "@tabler/icons-react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -16,6 +16,7 @@ const form={
   }
 
 const SignUp=()=>{
+  const [loading,setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -54,6 +55,7 @@ const SignUp=()=>{
   };
 
   const handleSubmit = () => {
+    
   let valid = true, newFormError: { [key: string]: string } = {};
 
   for (let key in data) {
@@ -71,6 +73,7 @@ const SignUp=()=>{
   console.log(valid);
 
   if (valid === true) {
+    setLoading(true);
     console.log("Submitting:", data);
 
     registerUser(data)
@@ -87,10 +90,12 @@ const SignUp=()=>{
         });
 
         setTimeout(()=>{
+          setLoading(false);
             navigate("/login");
         },3000)
       })
       .catch((err) => {
+        setLoading(false);
         console.log(err);
 
         notifications.show({
@@ -107,7 +112,13 @@ const SignUp=()=>{
 
   const [value, setValue] = useState('react');
   
-  return <div className="w-1/2 px-20 flex flex-col justify-center gap-3">
+  return<> <LoadingOverlay
+            visible={loading}
+            zIndex={1000}
+            className="translate-x-1/2"
+            overlayProps={{ radius: 'sm', blur: 2 }}
+            loaderProps={{ color: 'yellow.4', type: 'bars' }}
+          /> <div className="w-1/2 px-20 flex flex-col justify-center gap-3">
         <div className="text-2xl font-semibold">Create Account</div>
         <TextInput
         withAsterisk
@@ -153,7 +164,7 @@ const SignUp=()=>{
         </>
         }
        />
-       <Button onClick={handleSubmit} autoContrast variant="filled">SignUp</Button>
+       <Button loading={loading} onClick={handleSubmit} autoContrast variant="filled">SignUp</Button>
        <div className="mx-auto">Have an account ? <span
           className="text-bright-sun-400 hover:underline cursor-pointer"
           onClick={() => { navigate("/login"); setFormError(form); setData(form); }}>Login</span></div>
@@ -161,5 +172,6 @@ const SignUp=()=>{
 
 
   </div>
+  </>
 }
 export default SignUp;

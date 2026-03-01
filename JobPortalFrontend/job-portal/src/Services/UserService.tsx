@@ -18,7 +18,8 @@ const loginUser=async (login:any)=>{
   .then((res)=>{
   console.log(res);        // full axios response
   console.log(res.data);   // backend message
-  console.log(res.status); // 200
+  console.log(res.status);
+   return res;
 })
   .catch(error=>{throw error;});
 }

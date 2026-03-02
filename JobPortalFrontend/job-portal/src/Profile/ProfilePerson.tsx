@@ -4,21 +4,32 @@ import {
   Textarea,
   TextInput,
   TagsInput,
+  Button,
+  Card,
+  Group,
 } from "@mantine/core";
 import {
   IconBriefcase,
   IconDeviceFloppy,
   IconMapPin,
   IconPencil,
+  IconPlus,
+  IconTrash,
 } from "@tabler/icons-react";
 import ExpCard from "./ExpCard";
 import CertiCard from "./CertiCard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import fields from "../Data/Profile";
 import SelectInput from "./SelectInput";
+import { DateInput } from "@mantine/dates";
+import { useDispatch, useSelector } from "react-redux";
+import { getProfile } from "../Services/ProfileService";
+import Info from "./Info";
+import { setProfile } from "../Slices/ProfileSlice";
 
 const ProfilePerson = (props: any) => {
   const select = fields;
+  const dispatch = useDispatch();
 
   const [edit, setEdit] = useState([false, false, false, false, false]);
 
@@ -27,6 +38,29 @@ const ProfilePerson = (props: any) => {
     updated[index] = !updated[index];
     setEdit(updated);
   };
+
+  const user = useSelector((state:any)=>state.user);
+  const profile = useSelector((state:any)=>state.profile)
+
+useEffect(() => {
+  const id = user?.data?.id;
+  if (id) {
+    getProfile(id)
+      .then((data: any) => {
+        console.log(data);
+        dispatch(setProfile(data));
+      })
+      .catch((error: any) => {
+        console.log(error);
+      });
+  } else {
+    console.log("User ID not available yet");
+  }
+}, [user]);
+
+
+
+
 
   // -------------------- STATE --------------------
 
@@ -50,6 +84,12 @@ const ProfilePerson = (props: any) => {
 
   // -------------------- UI --------------------
 
+
+  if (!user || !user.data) {
+    // User is logged out, render fallback
+    return <div className="text-5xl text-red-600 font-bold text-center">Please log in to view your profile</div>;
+  }
+
   return (
     <div className="w-4/5 mx-auto">
       {/* HEADER */}
@@ -62,71 +102,7 @@ const ProfilePerson = (props: any) => {
         />
       </div>
 
-      <div className="px-3 mt-20">
-        {/* NAME + EDIT */}
-        <div className="text-3xl font-semibold flex justify-between">
-          {props.name}
-          <ActionIcon
-            onClick={() => handleEdit(0)}
-            size="lg"
-            color="yellow.5"
-            variant="subtle"
-          >
-            {edit[0] ? (
-              <IconDeviceFloppy className="h-4/5 w-4/5" />
-            ) : (
-              <IconPencil className="h-4/5 w-4/5" />
-            )}
-          </ActionIcon>
-        </div>
-
-        {/* BASIC INFO */}
-        {edit[0] ? (
-          <>
-            <div className="flex gap-10 [&>*]:w-1/2 mt-4">
-              <SelectInput
-                {...select[0]}
-                value={basicInfo.location}
-                onChange={(val) =>
-                  setBasicInfo({ ...basicInfo, location: val })
-                }
-              />
-
-              <SelectInput
-                {...select[1]}
-                value={basicInfo.role}
-                onChange={(val) =>
-                  setBasicInfo({ ...basicInfo, role: val })
-                }
-              />
-            </div>
-
-            <TextInput
-              mt="md"
-              label="Company"
-              value={basicInfo.company}
-              onChange={(e) =>
-                setBasicInfo({
-                  ...basicInfo,
-                  company: e.currentTarget.value,
-                })
-              }
-            />
-          </>
-        ) : (
-          <>
-            <div className="text-xl flex gap-1 items-center mt-4">
-              <IconBriefcase className="h-5 w-5" stroke={1.5} />
-              {basicInfo.role} &bull; {basicInfo.company}
-            </div>
-
-            <div className="text-lg flex gap-1 items-center text-mine-shaft-300">
-              <IconMapPin className="h-5 w-5" stroke={1.5} />
-              {basicInfo.location}
-            </div>
-          </>
-        )}
-      </div>
+      <Info name={user.data.name} userId={user.data.id} />
 
       <Divider my="xl" />
 
@@ -159,7 +135,7 @@ const ProfilePerson = (props: any) => {
           />
         ) : (
           <div className="text-sm text-mine-shaft-300 text-justify">
-            {aboutText}
+            {profile?.aboutText}
           </div>
         )}
       </div>
@@ -192,7 +168,7 @@ const ProfilePerson = (props: any) => {
           />
         ) : (
           <div className="flex flex-wrap gap-2">
-            {skills.map((skill: string, index: number) => (
+            {profile?.skills?.map((skill: any, index: number) => (
               <div
                 key={index}
                 className="bg-bright-sun-300 bg-opacity-15 rounded-3xl text-bright-sun-400 px-3 py-1 text-sm font-medium"
@@ -207,49 +183,242 @@ const ProfilePerson = (props: any) => {
       <Divider my="xl" />
 
       {/* EXPERIENCE */}
-      <div className="px-3">
-        <div className="text-2xl font-semibold mb-5 flex justify-between">
-          Experience
-          <ActionIcon
-            onClick={() => handleEdit(3)}
-            size="lg"
-            color="yellow.5"
-            variant="subtle"
-          >
-            {edit[3] ? <IconDeviceFloppy /> : <IconPencil />}
-          </ActionIcon>
-        </div>
+<div className="px-3">
+  <div className="text-2xl font-semibold mb-5 flex justify-between">
+    Experience
+    <ActionIcon
+      onClick={() => handleEdit(3)}
+      size="lg"
+      color="yellow.5"
+      variant="subtle"
+    >
+      {edit[3] ? <IconDeviceFloppy /> : <IconPencil />}
+    </ActionIcon>
+  </div>
 
-        <div className="flex flex-col gap-8">
-          {experience.map((exp: any, index: number) => (
-            <ExpCard key={index} {...exp} />
-          ))}
-        </div>
-      </div>
+  {edit[3] && (
+    <Button
+      leftSection={<IconPlus size={16} />}
+      mb="md"
+      onClick={() =>
+        setExperience([
+          ...experience,
+          {
+            title: "",
+            company: "",
+            location: "",
+            startDate: null,
+            endDate: null,
+            description: "",
+          },
+        ])
+      }
+    >
+      Add Experience
+    </Button>
+  )}
+
+  <div className="flex flex-col gap-6">
+    {profile?.experiences?.map((exp: any, index: number) =>
+      edit[3] ? (
+        <Card key={index} shadow="sm" radius="md" withBorder>
+          <Group grow>
+            <TextInput
+              label="Job Title"
+              value={exp.title}
+              onChange={(e) => {
+                const updated = [...experience];
+                updated[index].title = e.currentTarget.value;
+                setExperience(updated);
+              }}
+            />
+
+            <TextInput
+              label="Company"
+              value={exp.company}
+              onChange={(e) => {
+                const updated = [...experience];
+                updated[index].company = e.currentTarget.value;
+                setExperience(updated);
+              }}
+            />
+          </Group>
+
+          <TextInput
+            mt="md"
+            label="Location"
+            value={exp.location}
+            onChange={(e) => {
+              const updated = [...experience];
+              updated[index].location = e.currentTarget.value;
+              setExperience(updated);
+            }}
+          />
+
+          <Group grow mt="md">
+            <DateInput
+              label="Start Date"
+              value={exp.startDate}
+              onChange={(value) => {
+                const updated = [...experience];
+                updated[index].startDate = value;
+                setExperience(updated);
+              }}
+            />
+
+            <DateInput
+              label="End Date"
+              value={exp.endDate}
+              onChange={(value) => {
+                const updated = [...experience];
+                updated[index].endDate = value;
+                setExperience(updated);
+              }}
+            />
+          </Group>
+
+          <Textarea
+            mt="md"
+            label="Description"
+            autosize
+            minRows={3}
+            value={exp.description}
+            onChange={(e) => {
+              const updated = [...experience];
+              updated[index].description =
+                e.currentTarget.value;
+              setExperience(updated);
+            }}
+          />
+
+          <Button
+            color="red"
+            variant="light"
+            mt="md"
+            leftSection={<IconTrash size={16} />}
+            onClick={() => {
+              const updated = experience.filter(
+                (_, i) => i !== index
+              );
+              setExperience(updated);
+            }}
+          >
+            Remove
+          </Button>
+        </Card>
+      ) : (
+        <ExpCard key={index} {...exp} />
+      )
+    )}
+  </div>
+</div>
 
       <Divider my="xl" />
 
       {/* CERTIFICATIONS */}
-      <div className="px-3">
-        <div className="text-2xl font-semibold mb-5 flex justify-between">
-          Certifications
-          <ActionIcon
-            onClick={() => handleEdit(4)}
-            size="lg"
-            color="yellow.5"
-            variant="subtle"
-          >
-            {edit[4] ? <IconDeviceFloppy /> : <IconPencil />}
-          </ActionIcon>
-        </div>
+<div className="px-3">
+  <div className="text-2xl font-semibold mb-5 flex justify-between">
+    Certifications
+    <ActionIcon
+      onClick={() => handleEdit(4)}
+      size="lg"
+      color="yellow.5"
+      variant="subtle"
+    >
+      {edit[4] ? <IconDeviceFloppy /> : <IconPencil />}
+    </ActionIcon>
+  </div>
 
-        <div className="flex flex-col gap-8">
-          {certifications.map((certi: any, index: number) => (
-            <CertiCard key={index} {...certi} />
-          ))}
-        </div>
-      </div>
-    </div>
+  {edit[4] && (
+    <Button
+      leftSection={<IconPlus size={16} />}
+      mb="md"
+      onClick={() =>
+        setCertifications([
+          ...certifications,
+          {
+            title: "",
+            issuer: "",
+            issueDate: null,
+            credentialId: "",
+          },
+        ])
+      }
+    >
+      Add Certification
+    </Button>
+  )}
+
+  <div className="flex flex-col gap-6">
+    {profile?.certifications?.map((cert: any, index: number) =>
+      edit[4] ? (
+        <Card key={index} shadow="sm" radius="md" withBorder>
+          <TextInput
+            label="Certification Title"
+            value={cert.title}
+            onChange={(e) => {
+              const updated = [...certifications];
+              updated[index].title = e.currentTarget.value;
+              setCertifications(updated);
+            }}
+          />
+
+          <TextInput
+            mt="md"
+            label="Issuer"
+            value={cert.issuer}
+            onChange={(e) => {
+              const updated = [...certifications];
+              updated[index].issuer = e.currentTarget.value;
+              setCertifications(updated);
+            }}
+          />
+
+          <DateInput
+            mt="md"
+            label="Issue Date"
+            value={cert.issueDate}
+            onChange={(value) => {
+              const updated = [...certifications];
+              updated[index].issueDate = value;
+              setCertifications(updated);
+            }}
+          />
+
+          <TextInput
+            mt="md"
+            label="Credential ID"
+            value={cert.credentialId}
+            onChange={(e) => {
+              const updated = [...certifications];
+              updated[index].credentialId =
+                e.currentTarget.value;
+              setCertifications(updated);
+            }}
+          />
+
+          <Button
+            color="red"
+            variant="light"
+            mt="md"
+            leftSection={<IconTrash size={16} />}
+            onClick={() => {
+              const updated = certifications.filter(
+                (_, i) => i !== index
+              );
+              setCertifications(updated);
+            }}
+          >
+            Remove
+          </Button>
+        </Card>
+      ) : (
+        <CertiCard key={index} {...cert} />
+      )
+    )}
+  </div>
+  </div>
+ </div> 
   );
 };
 

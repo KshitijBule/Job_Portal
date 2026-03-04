@@ -1,4 +1,4 @@
-const CertiCard = (props:any) => {
+const CertiCard = (props: any) => {
   return (
     <div className="flex justify-between">
       <div className="flex gap-2 items-center">
@@ -6,14 +6,14 @@ const CertiCard = (props:any) => {
           <img className="h-7" src={`/Icons/${props.issuer}.png`} alt="" />
         </div>
         <div className="flex flex-col">
-          <div className="font-semibold">{props.name}</div>
-          <div className="text-sm text-mine-shaft-300">{props.issuer}</div>
+          <div className="font-semibold">{props.name || "Untitled"}</div>
+          <div className="text-sm text-mine-shaft-300">{props.issuer || "Unknown"}</div>
         </div>
       </div>
 
       <div className="flex flex-col items-end">
         <div className="text-sm text-mine-shaft-300">{props.issueDate}</div>
-        <div className="text-sm text-mine-shaft-300">ID: {props.certificateId}</div>
+        <div className="text-sm text-mine-shaft-300">ID: {props.certificateId || "N/A"}</div>
       </div>
     </div>
   );

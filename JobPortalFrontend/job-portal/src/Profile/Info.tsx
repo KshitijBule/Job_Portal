@@ -8,55 +8,58 @@ import {
 } from "@tabler/icons-react";
 import SelectInput from "./SelectInput";
 import fields from "../Data/Profile";
-import { getProfile, updateProfile } from "../Services/ProfileService";
+import { useSelector, useDispatch } from "react-redux";
+import { updateProfile } from "../Services/ProfileService";
+import { setProfile } from "../Slices/ProfileSlice";
 
 interface InfoProps {
   name: string;
-  userId: number;
 }
 
-const Info = ({ name, userId }: InfoProps) => {
+const Info = ({ name }: InfoProps) => {
   const select = fields;
+  const dispatch = useDispatch();
+  const profile = useSelector((state: any) => state.profile);
+
   const [edit, setEdit] = useState(false);
 
-  // State for basic info
   const [basicInfo, setBasicInfo] = useState({
-    id: userId,
     jobTitle: "",
     company: "",
     location: "",
   });
 
-  // Load profile from backend
+  // Sync with Redux profile
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const profile = await getProfile(userId);
+    if (profile) {
+      setBasicInfo({
+        jobTitle: profile.jobTitle || "",
+        company: profile.company || "",
+        location: profile.location || "",
+      });
+    }
+  }, [profile]);
 
-        // Normalize null values to empty strings
-        setBasicInfo({
-          id: profile.id,
-          jobTitle: profile.jobTitle || "",
-          company: profile.company || "",
-          location: profile.location || "",
-        });
-      } catch (error) {
-        console.error("Failed to load profile", error);
-      }
-    };
-    if (userId) fetchProfile();
-  }, [userId]);
-
-  // Toggle edit mode and save if exiting edit
   const handleEdit = async () => {
     if (edit) {
       try {
-        await updateProfile(basicInfo);
+        const updatedProfile = {
+          ...profile,
+          jobTitle: basicInfo.jobTitle,
+          company: basicInfo.company,
+          location: basicInfo.location,
+        };
+
+        const res = await updateProfile(updatedProfile);
+
+        dispatch(setProfile(res));
+
         console.log("Profile updated successfully");
       } catch (error) {
         console.error("Failed to update profile", error);
       }
     }
+
     setEdit(!edit);
   };
 
@@ -85,14 +88,15 @@ const Info = ({ name, userId }: InfoProps) => {
           <div className="flex gap-10 [&>*]:w-1/2 mt-4">
             <SelectInput
               {...select[0]}
-              value={basicInfo.jobTitle || ""}
+              value={basicInfo.jobTitle}
               onChange={(val) =>
                 setBasicInfo({ ...basicInfo, jobTitle: val || "" })
               }
             />
+
             <SelectInput
               {...select[1]}
-              value={basicInfo.company || ""}
+              value={basicInfo.company}
               onChange={(val) =>
                 setBasicInfo({ ...basicInfo, company: val || "" })
               }
@@ -102,11 +106,11 @@ const Info = ({ name, userId }: InfoProps) => {
           <TextInput
             mt="md"
             label="Location"
-            value={basicInfo.location || ""}
+            value={basicInfo.location}
             onChange={(e) =>
               setBasicInfo({
                 ...basicInfo,
-                location: e.currentTarget.value || "",
+                location: e.currentTarget.value,
               })
             }
           />
@@ -117,6 +121,7 @@ const Info = ({ name, userId }: InfoProps) => {
             <IconBriefcase className="h-5 w-5" stroke={1.5} />
             {basicInfo.jobTitle} &bull; {basicInfo.company}
           </div>
+
           <div className="text-lg flex gap-1 items-center text-mine-shaft-300">
             <IconMapPin className="h-5 w-5" stroke={1.5} />
             {basicInfo.location}

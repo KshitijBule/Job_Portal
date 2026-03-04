@@ -7,10 +7,14 @@ import {
   Button,
   Card,
   Group,
+  Avatar,
+  Overlay,
+  FileInput,
 } from "@mantine/core";
 import {
   IconBriefcase,
   IconDeviceFloppy,
+  IconEdit,
   IconMapPin,
   IconPencil,
   IconPlus,
@@ -18,14 +22,19 @@ import {
 } from "@tabler/icons-react";
 import ExpCard from "./ExpCard";
 import CertiCard from "./CertiCard";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import fields from "../Data/Profile";
 import SelectInput from "./SelectInput";
 import { DateInput } from "@mantine/dates";
 import { useDispatch, useSelector } from "react-redux";
-import { getProfile } from "../Services/ProfileService";
+import { getProfile, updateProfile } from "../Services/ProfileService";
 import Info from "./Info";
 import { setProfile } from "../Slices/ProfileSlice";
+import About from "./About";
+import Skills from "./Skills";
+import Experience from "./Experience";
+import Certifications from "./Certifications";
+import { useHover } from "@mantine/hooks";
 
 const ProfilePerson = (props: any) => {
   const select = fields;
@@ -82,6 +91,55 @@ useEffect(() => {
     props.certifications || []
   );
 
+ const handleSaveAbout = async (text: string) => {
+  try {
+    const updated = { ...profile, aboutText: text };
+    const res = await updateProfile(updated);
+    dispatch(setProfile(res));
+  } catch (err) {
+    console.error("Failed to save about section", err);
+  }
+};
+
+const handleFileChange = async (file: File) => {
+  if (!file) return;
+
+  try {
+    const base64 = await getBase64(file);
+    const stripped = base64.replace(/^data:image\/\w+;base64,/, "");
+
+    const updatedProfile = {
+      ...profile,
+      picture: stripped,
+    };
+
+    const res = await updateProfile(updatedProfile);
+    dispatch(setProfile(res));
+  } catch (err) {
+    console.error("Image upload failed", err);
+  }
+};
+
+
+
+const getBase64 = (file: any) => {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.readAsDataURL(file);
+
+    reader.onload = () => resolve(reader.result as string);
+
+    reader.onerror = (error) => reject(error);
+  });
+};
+
+
+const { hovered, ref } = useHover();
+const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+
+
   // -------------------- UI --------------------
 
 
@@ -94,330 +152,77 @@ useEffect(() => {
     <div className="w-4/5 mx-auto">
       {/* HEADER */}
       <div className="relative">
-        <img className="rounded-t-2xl" src="/Profile/banner.jpg" alt="" />
-        <img
-          className="w-48 h-48 rounded-full -bottom-1/3 absolute left-3 border-mine-shaft-950 border-8"
-          src="/avatar.png"
-          alt=""
-        />
+        {/* Banner */}
+        <img className="rounded-t-2xl" src="/Profile/banner.jpg" alt="Profile banner" />
+
+        <div
+  ref={ref}
+  className="absolute -bottom-1/3 left-3 flex items-center justify-center group cursor-pointer"
+  onClick={() => fileInputRef.current?.click()}
+>
+  <Avatar
+    className="!w-48 !h-48 border-mine-shaft-950 border-8 rounded-full"
+    src={
+    profile?.picture
+      ? `data:image/png;base64,${profile.picture}`
+      : "/Avatar.png"
+  }
+    alt="Profile avatar"
+  />
+
+  {/* Overlay */}
+  <Overlay
+    className="!rounded-full opacity-0 group-hover:opacity-75 transition-opacity"
+    color="#000"
+    backgroundOpacity={0.75}
+  />
+
+  {/* Edit icon */}
+  <IconEdit className="absolute z-[300] !w-16 !h-16 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+
+  {/* Hidden File Input */}
+  <input
+  ref={fileInputRef}
+  type="file"
+  accept="image/png,image/jpeg"
+  className="hidden"
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileChange(file);
+    }
+  }}
+/>
+</div>
+
+      
+       
       </div>
 
-      <Info name={user.data.name} userId={user.data.id} />
+
+      {/* INFO*/}
+
+      <Info name={user.data.name} />
 
       <Divider my="xl" />
 
       {/* ABOUT */}
-      <div className="px-3">
-        <div className="text-2xl font-semibold mb-3 flex justify-between">
-          About
-          <ActionIcon
-            onClick={() => handleEdit(1)}
-            size="lg"
-            color="yellow.5"
-            variant="subtle"
-          >
-            {edit[1] ? (
-              <IconDeviceFloppy />
-            ) : (
-              <IconPencil />
-            )}
-          </ActionIcon>
-        </div>
-
-        {edit[1] ? (
-          <Textarea
-            value={aboutText}
-            onChange={(e) =>
-              setAboutText(e.currentTarget.value)
-            }
-            autosize
-            minRows={4}
-          />
-        ) : (
-          <div className="text-sm text-mine-shaft-300 text-justify">
-            {profile?.aboutText}
-          </div>
-        )}
-      </div>
+      <About />
 
       <Divider my="xl" />
 
       {/* SKILLS */}
-      <div className="px-3">
-        <div className="text-2xl font-semibold mb-3 flex justify-between">
-          Skills
-          <ActionIcon
-            onClick={() => handleEdit(2)}
-            size="lg"
-            color="yellow.5"
-            variant="subtle"
-          >
-            {edit[2] ? (
-              <IconDeviceFloppy />
-            ) : (
-              <IconPencil />
-            )}
-          </ActionIcon>
-        </div>
-
-        {edit[2] ? (
-          <TagsInput
-            value={skills}
-            onChange={setSkills}
-            placeholder="Add skills"
-          />
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {profile?.skills?.map((skill: any, index: number) => (
-              <div
-                key={index}
-                className="bg-bright-sun-300 bg-opacity-15 rounded-3xl text-bright-sun-400 px-3 py-1 text-sm font-medium"
-              >
-                {skill}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <Skills />
 
       <Divider my="xl" />
 
       {/* EXPERIENCE */}
-<div className="px-3">
-  <div className="text-2xl font-semibold mb-5 flex justify-between">
-    Experience
-    <ActionIcon
-      onClick={() => handleEdit(3)}
-      size="lg"
-      color="yellow.5"
-      variant="subtle"
-    >
-      {edit[3] ? <IconDeviceFloppy /> : <IconPencil />}
-    </ActionIcon>
-  </div>
-
-  {edit[3] && (
-    <Button
-      leftSection={<IconPlus size={16} />}
-      mb="md"
-      onClick={() =>
-        setExperience([
-          ...experience,
-          {
-            title: "",
-            company: "",
-            location: "",
-            startDate: null,
-            endDate: null,
-            description: "",
-          },
-        ])
-      }
-    >
-      Add Experience
-    </Button>
-  )}
-
-  <div className="flex flex-col gap-6">
-    {profile?.experiences?.map((exp: any, index: number) =>
-      edit[3] ? (
-        <Card key={index} shadow="sm" radius="md" withBorder>
-          <Group grow>
-            <TextInput
-              label="Job Title"
-              value={exp.title}
-              onChange={(e) => {
-                const updated = [...experience];
-                updated[index].title = e.currentTarget.value;
-                setExperience(updated);
-              }}
-            />
-
-            <TextInput
-              label="Company"
-              value={exp.company}
-              onChange={(e) => {
-                const updated = [...experience];
-                updated[index].company = e.currentTarget.value;
-                setExperience(updated);
-              }}
-            />
-          </Group>
-
-          <TextInput
-            mt="md"
-            label="Location"
-            value={exp.location}
-            onChange={(e) => {
-              const updated = [...experience];
-              updated[index].location = e.currentTarget.value;
-              setExperience(updated);
-            }}
-          />
-
-          <Group grow mt="md">
-            <DateInput
-              label="Start Date"
-              value={exp.startDate}
-              onChange={(value) => {
-                const updated = [...experience];
-                updated[index].startDate = value;
-                setExperience(updated);
-              }}
-            />
-
-            <DateInput
-              label="End Date"
-              value={exp.endDate}
-              onChange={(value) => {
-                const updated = [...experience];
-                updated[index].endDate = value;
-                setExperience(updated);
-              }}
-            />
-          </Group>
-
-          <Textarea
-            mt="md"
-            label="Description"
-            autosize
-            minRows={3}
-            value={exp.description}
-            onChange={(e) => {
-              const updated = [...experience];
-              updated[index].description =
-                e.currentTarget.value;
-              setExperience(updated);
-            }}
-          />
-
-          <Button
-            color="red"
-            variant="light"
-            mt="md"
-            leftSection={<IconTrash size={16} />}
-            onClick={() => {
-              const updated = experience.filter(
-                (_, i) => i !== index
-              );
-              setExperience(updated);
-            }}
-          >
-            Remove
-          </Button>
-        </Card>
-      ) : (
-        <ExpCard key={index} {...exp} />
-      )
-    )}
-  </div>
-</div>
+      <Experience />
 
       <Divider my="xl" />
 
       {/* CERTIFICATIONS */}
-<div className="px-3">
-  <div className="text-2xl font-semibold mb-5 flex justify-between">
-    Certifications
-    <ActionIcon
-      onClick={() => handleEdit(4)}
-      size="lg"
-      color="yellow.5"
-      variant="subtle"
-    >
-      {edit[4] ? <IconDeviceFloppy /> : <IconPencil />}
-    </ActionIcon>
-  </div>
-
-  {edit[4] && (
-    <Button
-      leftSection={<IconPlus size={16} />}
-      mb="md"
-      onClick={() =>
-        setCertifications([
-          ...certifications,
-          {
-            title: "",
-            issuer: "",
-            issueDate: null,
-            credentialId: "",
-          },
-        ])
-      }
-    >
-      Add Certification
-    </Button>
-  )}
-
-  <div className="flex flex-col gap-6">
-    {profile?.certifications?.map((cert: any, index: number) =>
-      edit[4] ? (
-        <Card key={index} shadow="sm" radius="md" withBorder>
-          <TextInput
-            label="Certification Title"
-            value={cert.title}
-            onChange={(e) => {
-              const updated = [...certifications];
-              updated[index].title = e.currentTarget.value;
-              setCertifications(updated);
-            }}
-          />
-
-          <TextInput
-            mt="md"
-            label="Issuer"
-            value={cert.issuer}
-            onChange={(e) => {
-              const updated = [...certifications];
-              updated[index].issuer = e.currentTarget.value;
-              setCertifications(updated);
-            }}
-          />
-
-          <DateInput
-            mt="md"
-            label="Issue Date"
-            value={cert.issueDate}
-            onChange={(value) => {
-              const updated = [...certifications];
-              updated[index].issueDate = value;
-              setCertifications(updated);
-            }}
-          />
-
-          <TextInput
-            mt="md"
-            label="Credential ID"
-            value={cert.credentialId}
-            onChange={(e) => {
-              const updated = [...certifications];
-              updated[index].credentialId =
-                e.currentTarget.value;
-              setCertifications(updated);
-            }}
-          />
-
-          <Button
-            color="red"
-            variant="light"
-            mt="md"
-            leftSection={<IconTrash size={16} />}
-            onClick={() => {
-              const updated = certifications.filter(
-                (_, i) => i !== index
-              );
-              setCertifications(updated);
-            }}
-          >
-            Remove
-          </Button>
-        </Card>
-      ) : (
-        <CertiCard key={index} {...cert} />
-      )
-    )}
-  </div>
-  </div>
+      <Certifications />
  </div> 
   );
 };

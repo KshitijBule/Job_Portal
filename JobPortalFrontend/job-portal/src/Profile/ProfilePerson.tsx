@@ -38,7 +38,7 @@ import { useHover } from "@mantine/hooks";
 
 const ProfilePerson = (props: any) => {
   const select = fields;
-  const dispatch = useDispatch();
+ 
 
   const [edit, setEdit] = useState([false, false, false, false, false]);
 
@@ -47,6 +47,7 @@ const ProfilePerson = (props: any) => {
     updated[index] = !updated[index];
     setEdit(updated);
   };
+  const dispatch = useDispatch();
 
   const user = useSelector((state:any)=>state.user);
   const profile = useSelector((state:any)=>state.profile)

@@ -1,9 +1,10 @@
 import { IconBookmark, IconClockHour3 } from "@tabler/icons-react";
 import { Divider, Text } from "@mantine/core";
 import {Link} from "react-router-dom";
+import { timeAgo } from "../Services/Utilities";
 
 const JobCard =(props:any)=>{
-  return <Link to="/jobs" className="bg-mine-shaft-900 p-4 w-full flex flex-col gap-4 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-5px_rgba(252,196,25,0.35)] cursor-pointer">
+  return <Link to={`/jobs/${props.id}`} className="bg-mine-shaft-900 p-4 w-full flex flex-col gap-4 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-5px_rgba(252,196,25,0.35)] cursor-pointer">
 
 
 
@@ -14,7 +15,7 @@ const JobCard =(props:any)=>{
               </div>
               <div>
                 <div className="font-semibold">{props.jobTitle}</div>
-                <div className="text-xs text-mine-shaft-300">{props.company} &#x2022; {props.applicants} applicants</div>
+                <div className="text-xs text-mine-shaft-300">{props.company} &#x2022; {props.applicants?props.applicants.length:0} applicants</div>
               </div>
             </div>
             
@@ -28,13 +29,13 @@ const JobCard =(props:any)=>{
           <div>{props.location}</div>
         </div>
         <Text className="!text-xs text-justify !text-mine-shaft-300" lineClamp={3}>
-  {props.description}
+  {props.about}
 </Text>
         <Divider  size="xs" color="mineShaft.7"/>
         <div className="flex justify-between">
-          <div className="font-semibold text-mine-shaft-200">&#8377;{props.package}</div>
+          <div className="font-semibold text-mine-shaft-200">&#8377;{props.packageOffered} LPA</div>
           <div className="flex gap-1 text-xs items-center text-mine-shaft-400">
-           <IconClockHour3 className="h-5 w-5" stroke={1.5}/> {props.postedDaysAgo} days ago 
+           <IconClockHour3 className="h-5 w-5" stroke={1.5}/> {timeAgo(props.postTime)}
           </div>
         </div>
 

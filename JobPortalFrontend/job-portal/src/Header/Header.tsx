@@ -3,11 +3,32 @@ import { IconBell, IconHierarchy2, IconSettings, IconUsers} from "@tabler/icons-
 import NavLinks from "./NavLinks";
 import { Link, useLocation } from "react-router-dom";
 import ProfileMenu from "./ProfileMenu";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { getProfile } from "../Services/ProfileService";
+import { setProfile } from "../Slices/ProfileSlice";
 
 const Header =()=>{
   const location = useLocation();
   const user =useSelector((state:any)=>state.user);
+  const dispatch = useDispatch();
+  const profile = useSelector((state:any)=>state.profile)
+
+useEffect(() => {
+  const id = user?.data?.id;
+  if (id) {
+    getProfile(id)
+      .then((data: any) => {
+        console.log(data);
+        dispatch(setProfile(data));
+      })
+      .catch((error: any) => {
+        console.log(error);
+      });
+  } else {
+    console.log("User ID not available yet");
+  }
+}, [user]);
 
   return location.pathname!="/signup" && location.pathname!="/login"?<div className="w-full h-20 bg-mine-shaft-950 font-['poppins'] px-6 text-white flex justify-between items-center">
     <div className="flex gap-3 items-center text-bright-sun-400 ">

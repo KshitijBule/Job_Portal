@@ -1,70 +1,92 @@
-import { Button, Divider, Tabs } from "@mantine/core";
-import { IconArrowLeft } from "@tabler/icons-react";
-import { Link, useNavigate } from "react-router-dom";
-import Company from "../CompanyProfile/Company";
-import SimilarCompanies from "../CompanyProfile/SimilarCompanies";
-import PostedJob from "../PostedJob/PostedJob";
-import PostedJobDesc from "../PostedJob/PostedJobDesc";
-import { jobList } from "../Data/JobsData";
-import JobCard from "../FindJobs/JobCard";
+import { Tabs } from "@mantine/core";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { getAllJobs } from "../Services/JobService";
 import Card from "./Card";
 
-const JobHistory=()=>{
-  
-  return <div className="">
-    <div className="text-2xl font-semibold mb-5">Job History </div>
-      <div>
-          <Tabs variant="outline" radius="lg" defaultValue="applied">
-            <Tabs.List className="[&_button]:!text-lg font-semibold [&_button[data-active='true']]:text-bright-sun-400 mb-5">
-              <Tabs.Tab value="applied">Applied</Tabs.Tab>
-              <Tabs.Tab value="saved">Saved</Tabs.Tab>
-              <Tabs.Tab value="offered">Offered</Tabs.Tab>
-              <Tabs.Tab value="interviewing">Interviewing</Tabs.Tab>
-            </Tabs.List>
+const JobHistory = () => {
+  const profile = useSelector((state: any) => state.profile);
 
-            <Tabs.Panel value="applied">
-              <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+  const [activeTab, setActiveTab] = useState<string>("APPLIED");
+  const [jobList, setJobList] = useState<any[]>([]);
+  const [showList, setShowList] = useState<any[]>([]);
 
+  useEffect(() => {
+    getAllJobs()
+      .then((res) => {
+        console.log("Jobs data:", res);
+        setJobList(res);
 
+        const filtered = res.filter((job: any) =>
+          job.applicants?.some(
+            (applicant: any) =>
+              String(applicant.applicantId) === String(profile.id) &&
+              applicant.applicationStatus?.toUpperCase() === "APPLIED"
+          )
+        );
 
-       {
-      jobList.map((job,index)=> <Card key={index}{...job} applied/>)
+        setShowList(filtered);
+      })
+      .catch((err) => {
+        console.error("Error loading jobs:", err);
+      });
+  }, [profile.id]);
+
+  const handleTabChange = (value: string | null) => {
+    if (!value) return;
+
+    setActiveTab(value);
+
+    if (value === "SAVED") {
+      setShowList(
+        jobList.filter((job: any) =>
+          profile.savedJobs?.map(String).includes(String(job.id))
+        )
+      );
+    } else {
+      setShowList(
+        jobList.filter((job: any) =>
+          job.applicants?.some(
+            (applicant: any) =>
+              String(applicant.applicantId) === String(profile.id) &&
+              applicant.applicationStatus?.toUpperCase() === value
+          )
+        )
+      );
     }
+  };
+
+  return (
+    <div>
+      <div className="text-2xl font-semibold mb-5">Job History</div>
+
+      <Tabs
+        value={activeTab}
+        onChange={handleTabChange}
+        variant="outline"
+        radius="lg"
+      >
+        <Tabs.List className="[&_button]:!text-lg font-semibold [&_button[data-active='true']]:text-bright-sun-400 mb-5">
+          <Tabs.Tab value="APPLIED">Applied</Tabs.Tab>
+          <Tabs.Tab value="SAVED">Saved</Tabs.Tab>
+          <Tabs.Tab value="OFFERED">Offered</Tabs.Tab>
+          <Tabs.Tab value="INTERVIEWING">Interviewing</Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value={activeTab}>
+          <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {showList.map((item: any, index: number) => (
+              <Card
+                key={index}
+                {...item}
+                {...{ [activeTab.toLowerCase()]: true }}
+              />
+            ))}
+          </div>
+        </Tabs.Panel>
+      </Tabs>
     </div>
-            </Tabs.Panel>
-            <Tabs.Panel value="saved">
-              <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+  );
+};
 
-
-
-       {
-      jobList.map((job,index)=> <Card key={index}{...job} saved/>)
-    }
-    </div>
-            </Tabs.Panel>
-            <Tabs.Panel value="offered">
-              <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-
-
-
-       {
-      jobList.map((job,index)=> <Card key={index}{...job} offered/>)
-    }
-    </div>
-            </Tabs.Panel>
-            <Tabs.Panel value="interviewing">
-              <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-
-
-
-       {
-      jobList.map((job,index)=> <Card key={index}{...job} interviewing/>)
-    }
-    </div>
-            </Tabs.Panel>
-          </Tabs>
-
-        </div>
-    </div>
-}
 export default JobHistory;

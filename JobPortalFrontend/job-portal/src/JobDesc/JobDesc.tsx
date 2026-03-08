@@ -1,13 +1,56 @@
 import { ActionIcon, Button, Divider } from "@mantine/core";
-import { IconAdjustments, IconBookmark, IconMapPin } from "@tabler/icons-react";
+import { IconAdjustments, IconBookmark, IconBookmarkFilled, IconMapPin } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 import { card, desc, skills } from "../Data/JobDescData";
 import  DOMPurify from "dompurify";
 import { timeAgo } from "../Services/Utilities";
+import { useDispatch, useSelector } from "react-redux";
+import { changeProfile } from "../Slices/ProfileSlice";
+import { useEffect, useState } from "react";
 //@ts-ignore
 
 const JobDesc =(props:any)=>{
+  const [applied, setApplied] = useState(false);
+  const profile = useSelector((state: any) => state.profile);
+  const dispatch = useDispatch();
   const data = DOMPurify.sanitize(props.description);
+  const user = useSelector((state:any)=>state.user);
+
+  const handleSave = (id: string) => {
+    
+    let savedJobs: string[] = Array.isArray(profile.savedJobs) ? profile.savedJobs : [];
+  
+    if (savedJobs.includes(id)) {
+      
+      savedJobs = savedJobs.filter((jobId) => jobId !== id);
+      console.log("Unsaved job:", id);
+    } else {
+      
+      savedJobs = [...savedJobs, id];
+      console.log("Saved job:", id);
+    }
+  
+    const updatedProfile = { ...profile, savedJobs };
+    dispatch(changeProfile(updatedProfile));
+  };
+  
+    const handleUnsave = (id: string) => {
+      let savedJobs = profile.savedJobs || [];
+      savedJobs = savedJobs.filter((jobId: string) => jobId !== id);
+  
+      const updatedProfile = { ...profile, savedJobs };
+      dispatch(changeProfile(updatedProfile));
+  
+      console.log("Unsaved job:", id);
+    };
+
+    useEffect(()=>{
+        if(props.applicants?.filter((applicant:any)=>applicant.applicantId==user.id).length>0){
+          setApplied(true);
+        }
+        else setApplied(false);
+    },[props])
+
   return <div className="w-2/3">
         <div className="flex justify-between">
             <div className="flex gap-2 items-center">
@@ -20,11 +63,24 @@ const JobDesc =(props:any)=>{
               </div>
             </div>
             <div className="flex flex-col gap-2 items-center">
-              {props.edit?<Button color="red.5" size="sm" variant="outline">Delete</Button>:<IconBookmark className="text-bright-sun-400 cursor-pointer " stroke={1.5}/>}
+              {props.edit?<Button color="red.5" size="sm" variant="outline">Delete</Button>:profile.savedJobs?.includes(props.id) ? (
+          <IconBookmarkFilled
+            className="cursor-pointer text-bright-sun-400"
+            onClick={() => handleUnsave(props.id)}
+          />
+        ) : (
+          <IconBookmark
+            className="text-mine-shaft-300 cursor-pointer hover:text-bright-sun-400"
+            onClick={() => handleSave(props.id)}
+          />
+        )}
 
-              <Link to={`/apply-job/${props.id}`}>
+              {(props.edit || !applied) &&<Link to={`/apply-job/${props.id}`}>
               <Button color="yellow.5" size="sm" variant="light">{props.edit?"Edit":"Apply"}</Button>
-              </Link>
+              </Link>}
+              {
+                applied &&<Button color="green.8" size="sm" variant="light">Applied</Button>
+              }
 
             </div>
             

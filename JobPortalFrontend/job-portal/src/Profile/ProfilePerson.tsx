@@ -35,6 +35,7 @@ import Skills from "./Skills";
 import Experience from "./Experience";
 import Certifications from "./Certifications";
 import { useHover } from "@mantine/hooks";
+import { getBase64 } from "../Services/Utilities";
 
 const ProfilePerson = (props: any) => {
   const select = fields;
@@ -123,17 +124,17 @@ const handleFileChange = async (file: File) => {
 
 
 
-const getBase64 = (file: any) => {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
+// const getBase64 = (file: any) => {
+//   return new Promise<string>((resolve, reject) => {
+//     const reader = new FileReader();
 
-    reader.readAsDataURL(file);
+//     reader.readAsDataURL(file);
 
-    reader.onload = () => resolve(reader.result as string);
+//     reader.onload = () => resolve(reader.result as string);
 
-    reader.onerror = (error) => reject(error);
-  });
-};
+//     reader.onerror = (error) => reject(error);
+//   });
+// };
 
 
 const { hovered, ref } = useHover();

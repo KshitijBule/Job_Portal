@@ -1,10 +1,10 @@
 package com.JobPortalBackend.HireMeBackend.dto;
 
+import com.JobPortalBackend.HireMeBackend.dto.ApplicantDTO;
 import com.JobPortalBackend.HireMeBackend.entity.Job;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,7 +16,7 @@ public class JobDTO {
     private Long id;
     private  String jobTitle;
     private String company;
-    private List<Applicant> applicants;
+    private List<ApplicantDTO> applicants;
     private String about;
     private String experience;
     private String jobType;
@@ -32,7 +32,9 @@ public class JobDTO {
                 this.id,
                 this.jobTitle,
                 this.company,
-                this.applicants,
+                this.applicants != null
+                        ? this.applicants.stream().map(x -> x.toEntity()).toList()
+                        : null,
                 this.about,
                 this.experience,
                 this.jobType,

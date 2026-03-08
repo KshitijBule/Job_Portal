@@ -1,7 +1,7 @@
 package com.JobPortalBackend.HireMeBackend.entity;
 
 
-import com.JobPortalBackend.HireMeBackend.dto.Applicant;
+import com.JobPortalBackend.HireMeBackend.entity.Applicant;
 import com.JobPortalBackend.HireMeBackend.dto.JobDTO;
 import com.JobPortalBackend.HireMeBackend.dto.JobStatus;
 import lombok.AllArgsConstructor;
@@ -38,7 +38,9 @@ public class Job {
                 this.id,
                 this.jobTitle,
                 this.company,
-                this.applicants,
+                this.applicants != null
+                        ? this.applicants.stream().map(x -> x.toDTO()).toList()
+                        : null,
                 this.about,
                 this.experience,
                 this.jobType,

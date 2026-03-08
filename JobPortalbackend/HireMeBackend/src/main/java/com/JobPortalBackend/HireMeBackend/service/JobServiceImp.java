@@ -1,6 +1,10 @@
 package com.JobPortalBackend.HireMeBackend.service;
 
+import com.JobPortalBackend.HireMeBackend.dto.ApplicantDTO;
+import com.JobPortalBackend.HireMeBackend.dto.ApplicationStatus;
 import com.JobPortalBackend.HireMeBackend.dto.JobDTO;
+import com.JobPortalBackend.HireMeBackend.entity.Applicant;
+import com.JobPortalBackend.HireMeBackend.entity.Job;
 import com.JobPortalBackend.HireMeBackend.exception.JobPortalException;
 import com.JobPortalBackend.HireMeBackend.repository.JobRepository;
 import com.JobPortalBackend.HireMeBackend.utility.Utilities;
@@ -8,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service("jobService")
 public class JobServiceImp implements JobService{
@@ -30,5 +36,42 @@ public class JobServiceImp implements JobService{
     @Override
     public JobDTO getJob(Long id) throws JobPortalException {
         return jobRepository.findById(id).orElseThrow(()->new JobPortalException("JOB_NOT_FOUND")).toDTO();
+    }
+
+
+    // dikkat ho skti hai
+    @Override
+    public void applyJob(Long id, ApplicantDTO applicantDTO) throws JobPortalException {
+
+        Job job = jobRepository.findById(id)
+                .orElseThrow(() -> new JobPortalException("JOB_NOT_FOUND"));
+
+        List<Applicant> applicants = job.getApplicants();
+        if (applicants == null) {
+            applicants = new ArrayList<>();
+        }
+
+        // check already applied
+        if (applicants.stream()
+                .anyMatch(x -> Objects.equals(x.getApplicantId(), applicantDTO.getApplicantId()))) {
+            throw new JobPortalException("APPLICANT_ALREADY_APPLIED");
+        }
+
+        applicantDTO.setApplicationStatus(ApplicationStatus.APPLIED);
+        applicantDTO.setTimeStamp(LocalDateTime.now());
+
+        if (applicantDTO.getApplicantId() == null) {
+            throw new JobPortalException("APPLICANT_ID_REQUIRED");
+        }
+
+        Applicant applicant = applicantDTO.toEntity();
+
+
+        applicant.setApplicantId(applicantDTO.getApplicantId());
+
+        applicants.add(applicant);
+
+        job.setApplicants(applicants);
+        jobRepository.save(job);
     }
 }

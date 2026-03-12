@@ -32,6 +32,7 @@ public class Job {
     private String description;
     private List<String> skillRequired;
     private JobStatus jobStatus;
+    private Long postedBy;
 
     public JobDTO toDTO() {
         return new JobDTO(
@@ -49,7 +50,8 @@ public class Job {
                 this.postTime,
                 this.description,
                 this.skillRequired,
-                this.jobStatus
+                this.jobStatus,
+                this.postedBy
         );
     }
 

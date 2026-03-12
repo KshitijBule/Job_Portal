@@ -47,7 +47,9 @@ public class UserServiceImp implements UserService{
         if(optional.isPresent()){
             throw new JobPortalException("USER_FOUND");
         }
-        userDTO.setProfileId(profileService.createProfile(userDTO.getEmail()));
+        userDTO.setProfileId(
+                profileService.createProfile(userDTO.getEmail(), userDTO.getName())
+        );
         userDTO.setId(Utilities.getNextSequence("users"));
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         User user = userDTO.toEntity();

@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @Validated
 @CrossOrigin
@@ -23,6 +25,11 @@ public class ProfileAPI {
     @GetMapping("/get/{id}")
     public ResponseEntity<ProfileDTO> getProfile(@PathVariable Long id) throws JobPortalException {
         return new ResponseEntity<>(profileService.getProfile(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<List<ProfileDTO>> getALlProfile() throws JobPortalException {
+        return new ResponseEntity<>(profileService.getAllProfile(), HttpStatus.OK);
     }
 
     // @putmapping updation k liye use hoti hai aur @postmapping create krne k liye

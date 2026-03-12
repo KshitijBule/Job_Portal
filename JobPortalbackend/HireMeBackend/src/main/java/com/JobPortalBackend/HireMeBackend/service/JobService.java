@@ -1,6 +1,7 @@
 package com.JobPortalBackend.HireMeBackend.service;
 
 import com.JobPortalBackend.HireMeBackend.dto.ApplicantDTO;
+import com.JobPortalBackend.HireMeBackend.dto.Application;
 import com.JobPortalBackend.HireMeBackend.dto.JobDTO;
 import com.JobPortalBackend.HireMeBackend.dto.ResponseDTO;
 import com.JobPortalBackend.HireMeBackend.exception.JobPortalException;
@@ -17,4 +18,8 @@ public interface JobService {
     public JobDTO getJob(Long id) throws JobPortalException;
 
     public void applyJob(Long id, ApplicantDTO applicantDTO) throws JobPortalException;
+
+    public List<JobDTO> getJobsPostedBy(Long id) throws JobPortalException;
+
+    public void changeAppStatus(Application applicantion) throws JobPortalException;
 }

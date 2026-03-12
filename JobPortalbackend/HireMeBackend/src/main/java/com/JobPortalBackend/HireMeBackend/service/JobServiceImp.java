@@ -1,6 +1,7 @@
 package com.JobPortalBackend.HireMeBackend.service;
 
 import com.JobPortalBackend.HireMeBackend.dto.ApplicantDTO;
+import com.JobPortalBackend.HireMeBackend.dto.Application;
 import com.JobPortalBackend.HireMeBackend.dto.ApplicationStatus;
 import com.JobPortalBackend.HireMeBackend.dto.JobDTO;
 import com.JobPortalBackend.HireMeBackend.entity.Applicant;
@@ -71,6 +72,27 @@ public class JobServiceImp implements JobService{
 
         applicants.add(applicant);
 
+        job.setApplicants(applicants);
+        jobRepository.save(job);
+    }
+
+    @Override
+    public List<JobDTO> getJobsPostedBy(Long id) throws JobPortalException {
+        return jobRepository.findByPostedBy(id).stream().map((x)->x.toDTO()).toList();
+    }
+
+    @Override
+    public void changeAppStatus(Application applicantion) throws JobPortalException {
+        Job job = jobRepository.findById(applicantion.getId())
+                .orElseThrow(() -> new JobPortalException("APPLICANTION_NOT_FOUND"));
+
+        List<Applicant> applicants = job.getApplicants().stream().map((x)->{
+            if(applicantion.getApplicantId() == x.getApplicantId()){
+                x.setApplicationStatus(applicantion.getApplicationStatus());
+                if(applicantion.getApplicationStatus().equals(ApplicationStatus.INTERVIEWING))x.setInterviewTime(applicantion.getInterviewTime());
+            }
+            return x;
+        }).toList();
         job.setApplicants(applicants);
         jobRepository.save(job);
     }

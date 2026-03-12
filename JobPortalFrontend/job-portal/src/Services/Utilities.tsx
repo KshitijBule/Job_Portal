@@ -33,6 +33,37 @@ const timeAgo = (time: string | number | Date): string => {
   return `${months} month${months !== 1 ? "s" : ""} ago`;
 };
 
+const formatInterviewTime=(dateStr:any)=>{
+  const date = new Date(dateStr);
+
+ return date.toLocaleString("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true
+});
+}
+
+function openBase64PDF(base64String:string) {
+  const byteCharacters = atob(base64String);
+
+  const byteNumbers = new Array(byteCharacters.length);
+
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+
+  const byteArray = new Uint8Array(byteNumbers);
+
+  const blob = new Blob([byteArray], { type: "application/pdf" });
+
+  const blobUrl = URL.createObjectURL(blob);
+
+  window.open(blobUrl, "_blank");
+}
+
 const getBase64 = (file: any) => {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -45,4 +76,4 @@ const getBase64 = (file: any) => {
   });
 };
 
-export {formatDate,timeAgo,getBase64};
+export {formatDate,timeAgo,getBase64,formatInterviewTime,openBase64PDF};

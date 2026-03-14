@@ -66,7 +66,7 @@ const Talents=()=>{
   return <div className="p-5">
     <div className="flex justify-between">
       <div className="text-2xl font-semibold">Talents</div>
-      <Sort/>
+      
     </div>
     <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {filteredTalents.map((talent:any,index:any)=>(<TalentCard key={index} {...talent}/>))}

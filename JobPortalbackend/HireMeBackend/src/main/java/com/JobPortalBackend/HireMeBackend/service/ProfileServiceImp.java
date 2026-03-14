@@ -20,7 +20,7 @@ public class ProfileServiceImp implements ProfileService {
         Profile profile = new Profile();
         profile.setId(Utilities.getNextSequence("profiles"));
         profile.setEmail(email);
-        profile.setName(name);   // ✅ THIS IS MISSING
+        profile.setName(name);
         profile.setSkills(new ArrayList<>());
         profile.setExperiences(new ArrayList<>());
         profile.setCertifications(new ArrayList<>());

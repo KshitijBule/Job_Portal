@@ -1,9 +1,6 @@
 package com.JobPortalBackend.HireMeBackend.service;
 
-import com.JobPortalBackend.HireMeBackend.dto.ApplicantDTO;
-import com.JobPortalBackend.HireMeBackend.dto.Application;
-import com.JobPortalBackend.HireMeBackend.dto.ApplicationStatus;
-import com.JobPortalBackend.HireMeBackend.dto.JobDTO;
+import com.JobPortalBackend.HireMeBackend.dto.*;
 import com.JobPortalBackend.HireMeBackend.entity.Applicant;
 import com.JobPortalBackend.HireMeBackend.entity.Job;
 import com.JobPortalBackend.HireMeBackend.exception.JobPortalException;
@@ -24,8 +21,20 @@ public class JobServiceImp implements JobService{
 
     @Override
     public JobDTO postJob(JobDTO jobDTO) throws JobPortalException {
-        jobDTO.setId(Utilities.getNextSequence("jobs"));
-        jobDTO.setPostTime(LocalDateTime.now());
+        if (jobDTO.getId() == 0) {
+            jobDTO.setId(Utilities.getNextSequence("jobs"));
+            jobDTO.setPostTime(LocalDateTime.now());
+        }
+        else {
+            Job job = jobRepository.findById(jobDTO.getId())
+                    .orElseThrow(() -> new JobPortalException("JOB_NOT_FOUND"));
+                // agar draft pe tha to jab post hua uska post time update krne k liye
+            if (job.getJobStatus().equals(JobStatus.DRAFT)
+                    || jobDTO.getJobStatus().equals(JobStatus.CLOSED)) {
+                jobDTO.setPostTime(LocalDateTime.now());
+            }
+        }
+
         return jobRepository.save(jobDTO.toEntity()).toDTO();
     }
 

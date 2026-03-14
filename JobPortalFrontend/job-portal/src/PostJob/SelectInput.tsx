@@ -16,7 +16,7 @@ const SelectInput = (props: any) => {
     setData(options);
     setValue(props.form.getInputProps(props.name).value);
     setSearch(props.form.getInputProps(props.name).value);
-  }, [options]);
+  }, [props]);
 
   const exactOptionMatch = data.some((item) => item === search);
 
@@ -39,14 +39,14 @@ const SelectInput = (props: any) => {
         withinPortal={false}
         onOptionSubmit={(val) => {
           if (val === '$create') {
-            setData((current) => [...current, search]);
-            setValue(search);
-            props.form.setFieldValue(props.name,val);
-          } else {
-            setValue(val);
-            setSearch(val);
-            props.form.setFieldValue(props.name,val);
-          }
+  setData((current) => [...current, search]);
+  setValue(search);
+  props.form.setFieldValue(props.name, search);
+} else {
+  setValue(val);
+  setSearch(val);
+  props.form.setFieldValue(props.name, val);
+}
           combobox.closeDropdown();
         }}
       >

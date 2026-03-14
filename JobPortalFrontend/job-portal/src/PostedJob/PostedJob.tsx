@@ -23,6 +23,8 @@ useEffect(() => {
     ?.filter((job: any) => job?.jobStatus?.toUpperCase() === "OPEN").length}]</Tabs.Tab>
           <Tabs.Tab value="DRAFT">Drafts [{props.jobList
     ?.filter((job: any) => job?.jobStatus?.toUpperCase() === "DRAFT").length}]</Tabs.Tab>
+    <Tabs.Tab value="CLOSED">Closed [{props.jobList
+    ?.filter((job: any) => job?.jobStatus?.toUpperCase() === "CLOSED").length}]</Tabs.Tab>
         </Tabs.List>
       </Tabs>
 

@@ -5,11 +5,17 @@ import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import Superscript from '@tiptap/extension-superscript';
 import SubScript from '@tiptap/extension-subscript';
+import { useEffect } from 'react';
 // import { content } from '../Data/PostJob';
 
 
 
 const TextEditor=(props:any)=> {
+  
+  useEffect(()=>{
+    editor.commands.setContent(props.data);
+  },[props.data])
+
   const editor = useEditor({
     shouldRerenderOnTransaction: true,
     extensions: [

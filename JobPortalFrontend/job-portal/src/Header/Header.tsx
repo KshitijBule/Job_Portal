@@ -19,7 +19,7 @@ useEffect(() => {
   if (id) {
     getProfile(id)
       .then((data: any) => {
-        console.log(data);
+        // console.log(data);
         dispatch(setProfile(data));
       })
       .catch((error: any) => {

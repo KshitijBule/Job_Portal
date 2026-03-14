@@ -4,15 +4,34 @@ import SelectInput from "./SelectInput";
 import TextEditor from "./TextEditor";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { isNotEmpty, useForm } from "@mantine/form";
-import { postJob } from "../Services/JobService";
+import { getJob, postJob } from "../Services/JobService";
 import { errorNotification, successNotification } from "../Services/NotificationService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
 
 const PostJob=()=>{
+  const {id} = useParams();
+  const [editorData, setEditorData] = useState(content);
   const user = useSelector((state:any)=>state.profile);
   const navigate = useNavigate();
   const select=fields;
+
+  useEffect(()=>{
+    window.scrollTo(0,0);
+    if(id!=="0"){
+      getJob(Number(id)).then((res)=>{
+        form.setValues(res);
+        setEditorData(res.description);
+      }).catch((err)=>{
+        console.log(err);
+      })
+    }else{
+      form.reset();
+      setEditorData(content);
+    }
+  },[id])
+
   const form = useForm({
   initialValues: {
     jobTitle: '',
@@ -44,7 +63,7 @@ const PostJob=()=>{
 const handlePost=()=>{
       form.validate();
       if(!form.isValid()) return;
-      postJob({...form.getValues(),postedBy:user.id,jobStatus:"OPEN"}).then((res)=>{
+      postJob({...form.getValues(),id,postedBy:user.id,jobStatus:"OPEN"}).then((res)=>{
         successNotification("Success","Job Posted Successfully");
         navigate(`/posted-job/${res.id}`);
       }).catch((err)=>{
@@ -54,7 +73,7 @@ const handlePost=()=>{
 }
 
 const handleDraft=()=>{
-      postJob({...form.getValues(),postedBy:user.id,jobStatus:"DRAFT"}).then((res)=>{
+      postJob({...form.getValues(),id,postedBy:user.id,jobStatus:"DRAFT"}).then((res)=>{
         successNotification("Success","Job Drafted Successfully");
         navigate(`/posted-job/${res.id}`);
       }).catch((err)=>{
@@ -83,7 +102,7 @@ const handleDraft=()=>{
           <Textarea {...form.getInputProps('about')} withAsterisk className="my-3" label="About" autosize minRows={2} placeholder="Enter about job" />
           <div className="[&_button[data-active='true']]:!text-bright-sun-400 [&_button[data-active='true']]:!bg-bright-sun-400/20" >
             <div className="text-sm font-medium">Job Description <span className="text-red-500">*</span></div>
-            <TextEditor form={form}/>
+            <TextEditor form={form} data={editorData}/>
           </div>
           <div className="flex gap-3">
             <Button color="yellow.5" onClick={handlePost}variant="light">Publish Job</Button>

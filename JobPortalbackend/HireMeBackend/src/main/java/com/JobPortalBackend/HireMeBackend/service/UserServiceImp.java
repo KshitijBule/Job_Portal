@@ -1,11 +1,13 @@
 package com.JobPortalBackend.HireMeBackend.service;
 
 import com.JobPortalBackend.HireMeBackend.dto.LoginDTO;
+import com.JobPortalBackend.HireMeBackend.dto.NotificationDTO;
 import com.JobPortalBackend.HireMeBackend.dto.ResponseDTO;
 import com.JobPortalBackend.HireMeBackend.dto.UserDTO;
 import com.JobPortalBackend.HireMeBackend.entity.OTP;
 import com.JobPortalBackend.HireMeBackend.entity.User;
 import com.JobPortalBackend.HireMeBackend.exception.JobPortalException;
+import com.JobPortalBackend.HireMeBackend.repository.NotificationRepository;
 import com.JobPortalBackend.HireMeBackend.repository.OTPRepository;
 import com.JobPortalBackend.HireMeBackend.repository.UserRepository;
 import com.JobPortalBackend.HireMeBackend.utility.Data;
@@ -40,6 +42,9 @@ public class UserServiceImp implements UserService{
 
     @Autowired
     private ProfileService profileService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public UserDTO registerUser(UserDTO userDTO) throws JobPortalException {
@@ -92,6 +97,11 @@ public class UserServiceImp implements UserService{
         User user = userRepository.findByEmail(loginDTO.getEmail()).orElseThrow(()-> new JobPortalException("USER_NOT_FOUND") );
         user.setPassword(passwordEncoder.encode(loginDTO.getPassword()));
         userRepository.save(user);
+        NotificationDTO noti = new NotificationDTO();
+        noti.setId(user.getId());
+        noti.setMessage("Password Reset Successful");
+        noti.setAction("Password Reset");
+        notificationService.sendNotification((noti));
         return new ResponseDTO("Password change successfully");
     }
 

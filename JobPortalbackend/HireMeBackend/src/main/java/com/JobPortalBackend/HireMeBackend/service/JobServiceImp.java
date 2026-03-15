@@ -18,6 +18,8 @@ import java.util.Objects;
 public class JobServiceImp implements JobService{
     @Autowired
     private JobRepository jobRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public JobDTO postJob(JobDTO jobDTO) throws JobPortalException {
@@ -98,7 +100,19 @@ public class JobServiceImp implements JobService{
         List<Applicant> applicants = job.getApplicants().stream().map((x)->{
             if(applicantion.getApplicantId() == x.getApplicantId()){
                 x.setApplicationStatus(applicantion.getApplicationStatus());
-                if(applicantion.getApplicationStatus().equals(ApplicationStatus.INTERVIEWING))x.setInterviewTime(applicantion.getInterviewTime());
+                if(applicantion.getApplicationStatus().equals(ApplicationStatus.INTERVIEWING)){
+                    x.setInterviewTime(applicantion.getInterviewTime());
+                    NotificationDTO notiDTO = new NotificationDTO();
+                    notiDTO.setAction(("Interview Scheduled"));
+                    notiDTO.setMessage("Interview Scheduled for job id"+ applicantion.getId());
+                    notiDTO.setUserId(applicantion.getApplicantId());
+                    notiDTO.setRoute("/job-history");
+                    try {
+                        notificationService.sendNotification(notiDTO);
+                    } catch (JobPortalException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
             return x;
         }).toList();

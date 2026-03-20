@@ -2,13 +2,16 @@ import { Anchor, Button, Checkbox, LoadingOverlay, PasswordInput, rem, TextInput
 import { IconAt, IconCheck, IconLock, IconX } from "@tabler/icons-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../Services/UserService";
+// import { loginUser } from "../Services/UserService";
 import { loginValidation } from "../Services/FormValidation";
 import { notifications } from "@mantine/notifications";
 import { useDisclosure } from "@mantine/hooks";
 import ResetPassword from "./ResetPasword";
 import { useDispatch } from "react-redux";
 import { setUser } from "../Slices/UserSlice";
+import { setJwt } from "../Slices/JwtSlice";
+import { loginUser } from "../Services/AuthService";
+import { jwtDecode } from "jwt-decode";
 
 const form={
     email:"",
@@ -70,10 +73,22 @@ const navigate = useNavigate();
                 icon:<IconCheck style={{width:"90%",height:"90%"}}/>,
                 withCloseButton: true,
               });
-      
+
+              dispatch(setJwt(res.jwt));
+              const decoded: any = jwtDecode(res.jwt);
+
+// ✅ store token
+localStorage.setItem("token", res.jwt);
+
+// ✅ update redux user instantly
+dispatch(setUser({
+  id: decoded.id,
+  email: decoded.sub
+}));
               setTimeout(()=>{
                   setLoading(false);
-                  dispatch(setUser(res));
+                  
+                 
                   navigate("/");
               },3000)
             })

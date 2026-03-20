@@ -24,7 +24,9 @@ const ProfileMenu = () => {
   const [checked, setChecked] = useState(false);
   const [opened, setOpened] = useState(false);
   const handleLogout=()=>{
+    localStorage.removeItem("token");
     dispatch(removeUser());
+
   }
   const profile=useSelector((state:any)=>state.profile);
 

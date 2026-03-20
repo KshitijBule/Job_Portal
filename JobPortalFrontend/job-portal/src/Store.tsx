@@ -2,14 +2,16 @@ import { configureStore } from "@reduxjs/toolkit";
 import { configure } from "@testing-library/dom";
 import userReducer from "./Slices/UserSlice";
 import profileReducer from "./Slices/ProfileSlice";
-import filterReducer from "./Slices/FilterSlice"
-import sortReducer from "./Slices/SortSlice"
+import filterReducer from "./Slices/FilterSlice";
+import sortReducer from "./Slices/SortSlice";
+import jwtReducer from "./Slices/JwtSlice";
 
 export default configureStore({
   reducer:{
     user:userReducer,
     profile:profileReducer,
     filter:filterReducer,
-    sort:sortReducer
+    sort:sortReducer,
+    jwt:jwtReducer
   }
 });

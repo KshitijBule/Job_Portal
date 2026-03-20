@@ -14,6 +14,7 @@ import JobHistoryPage from "./JobHistoryPage"
 import PostedJobPage from "./PostedJobPage"
 import CompanyPage from "./CompanyPage"
 import { useSelector } from "react-redux";
+import ProtectedRoute from "../Services/ProtectedRoute";
 
 const AppRoutes=()=>{
   const user = useSelector((state:any)=>state.user);
@@ -24,12 +25,33 @@ const AppRoutes=()=>{
         <Route path='/find-jobs' element={<FindJobs/>}/>
         <Route path='/find-talent' element={<FindTalentPage/>}/>
         <Route path='/talent-profile/:id' element={<TalentProfilepage/>}/>
-        <Route path='/post-job/:id' element={<PostJobPage/>}/>
+        <Route 
+  path="/post-job/:id" 
+  element={
+    <ProtectedRoute allowedRoles={["EMPLOYER"]}>
+      <PostJobPage />
+    </ProtectedRoute>
+  } 
+/>
         <Route path='/jobs/:id' element={<JobDescPage/>}/>
         <Route path='/apply-job/:id' element={<ApplyJobPage/>}/>
         <Route path='/company/:name' element={<CompanyPage/>}/>
-        <Route path='/posted-job/:id' element={<PostedJobPage/>}/>
-        <Route path='/job-history' element={<JobHistoryPage/>}/>
+       <Route 
+  path='/posted-job/:id' 
+  element={
+    <ProtectedRoute allowedRoles={["EMPLOYER"]}>
+      <PostedJobPage />
+    </ProtectedRoute>
+  }
+/>
+        <Route 
+  path='/job-history' 
+  element={
+    <ProtectedRoute allowedRoles={['APPLICANT']}>
+      <JobHistoryPage/>
+    </ProtectedRoute>
+  } 
+/>
         <Route path='/signup' element={user?<Navigate to="/"/>:<SignUpPage/>}/>
         <Route path='/login' element={user?<Navigate to="/"/>:<SignUpPage/>}/>
         <Route path='/profile' element={<ProfilePage/>}/>

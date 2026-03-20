@@ -1,34 +1,49 @@
 import { Avatar, Button, Indicator } from "@mantine/core";
 import { IconBell, IconHierarchy2, IconSettings, IconUsers} from "@tabler/icons-react";
 import NavLinks from "./NavLinks";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProfileMenu from "./ProfileMenu";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { getProfile } from "../Services/ProfileService";
 import { setProfile } from "../Slices/ProfileSlice";
 import NotiMenu from "./NotiMenu";
+import { jwtDecode } from "jwt-decode";
+import { setUser } from "../Slices/UserSlice";
+import { setupResponseInterceptor } from "../Interceptor/AxiosInterceptor";
 
 const Header =()=>{
   const location = useLocation();
   const user =useSelector((state:any)=>state.user);
   const dispatch = useDispatch();
   const profile = useSelector((state:any)=>state.profile)
+const navigate = useNavigate();
 
 useEffect(() => {
-  const id = user?.data?.id;
-  if (id) {
-    getProfile(id)
-      .then((data: any) => {
-        // console.log(data);
-        dispatch(setProfile(data));
-      })
-      .catch((error: any) => {
-        console.log(error);
-      });
-  } else {
-    console.log("User ID not available yet");
-  }
+  setupResponseInterceptor(navigate,dispatch);
+  const token = localStorage.getItem("token");
+
+  if (!token) return;
+
+  const decoded: any = jwtDecode(token);
+
+  dispatch(setUser({
+    id: decoded.id,
+    email: decoded.sub
+  }));
+
+}, []);
+useEffect(() => {
+  if (!user?.id) return;
+
+  getProfile(user.id)
+    .then((data: any) => {
+      dispatch(setProfile(data));
+    })
+    .catch((error: any) => {
+      console.log(error);
+    });
+
 }, [user]);
 
   return location.pathname!="/signup" && location.pathname!="/login"?<div className="w-full h-20 bg-mine-shaft-950 font-['poppins'] px-6 text-white flex justify-between items-center">
@@ -42,9 +57,23 @@ useEffect(() => {
 
     <div className="flex gap-5 items-center">
       
-      {user ? <ProfileMenu/>:<Link to="/login">
-        <Button variant="subtle" color="yellow.5">Login</Button>
-      </Link>}
+     {user?.id ? (
+  <div className="flex items-center gap-3">
+    
+    {/* Name */}
+    <span className="text-white font-medium">
+      {profile?.name || "User"}
+    </span>
+
+    {/* Avatar + dropdown */}
+    <ProfileMenu />
+
+  </div>
+) : (
+  <Link to="/login">
+    <Button variant="subtle" color="yellow.5">Login</Button>
+  </Link>
+)}
       {/* <div className="bg-mine-shaft-900 p-1.5 rounded-full">
         <IconSettings stroke={1.5}/>
         </div> */}

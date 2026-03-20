@@ -1,20 +1,22 @@
-import axios from "axios"
+
+
+import axiosInstance from "../Interceptor/AxiosInterceptor";
 const base_url="http://localhost:8080/profiles/"
 
 const getProfile = async (id: any) => {
-  return axios.get(`${base_url}get/${id}`)
+  return axiosInstance.get(`/profiles/get/${id}`)
     .then((res) => res.data) // return the backend payload
     .catch(error => { throw error; });
 };
 
 const updateProfile = async(profile:any)=>{
-  return axios.put(`${base_url}update`,profile)
+  return axiosInstance.put(`/profiles/update`,profile)
   .then(result=>result.data)
   .catch(error=>{throw error;});
 }
 
 const getAllProfiles = async ()=>{
-  return axios.get(`${base_url}getAll`)
+  return axiosInstance.get(`/profiles/getAll`)
     .then(result => result.data)
     .catch(error => {throw error;});
 }

@@ -39,7 +39,6 @@ import { getBase64 } from "../Services/Utilities";
 
 const ProfilePerson = (props: any) => {
   const select = fields;
- 
 
   const [edit, setEdit] = useState([false, false, false, false, false]);
 
@@ -48,30 +47,25 @@ const ProfilePerson = (props: any) => {
     updated[index] = !updated[index];
     setEdit(updated);
   };
+
   const dispatch = useDispatch();
 
-  const user = useSelector((state:any)=>state.user);
-  const profile = useSelector((state:any)=>state.profile)
+  const user = useSelector((state: any) => state.user);
+  const profile = useSelector((state: any) => state.profile);
 
-useEffect(() => {
-  const id = user?.data?.id;
-  if (id) {
-    getProfile(id)
+  // ✅ Fetch profile ONLY when user.id is available
+  useEffect(() => {
+    if (!user?.id) return;
+
+    getProfile(user.id)
       .then((data: any) => {
-        console.log(data);
+        console.log("PROFILE DATA:", data);
         dispatch(setProfile(data));
       })
       .catch((error: any) => {
         console.log(error);
       });
-  } else {
-    console.log("User ID not available yet");
-  }
-}, [user]);
-
-
-
-
+  }, [user?.id]);
 
   // -------------------- STATE --------------------
 
@@ -93,118 +87,98 @@ useEffect(() => {
     props.certifications || []
   );
 
- const handleSaveAbout = async (text: string) => {
-  try {
-    const updated = { ...profile, aboutText: text };
-    const res = await updateProfile(updated);
-    dispatch(setProfile(res));
-  } catch (err) {
-    console.error("Failed to save about section", err);
-  }
-};
+  const handleSaveAbout = async (text: string) => {
+    try {
+      const updated = { ...profile, aboutText: text };
+      const res = await updateProfile(updated);
+      dispatch(setProfile(res));
+    } catch (err) {
+      console.error("Failed to save about section", err);
+    }
+  };
 
-const handleFileChange = async (file: File) => {
-  if (!file) return;
+  const handleFileChange = async (file: File) => {
+    if (!file) return;
 
-  try {
-    const base64 = await getBase64(file);
-    const stripped = base64.replace(/^data:image\/\w+;base64,/, "");
+    try {
+      const base64 = await getBase64(file);
+      const stripped = base64.replace(/^data:image\/\w+;base64,/, "");
 
-    const updatedProfile = {
-      ...profile,
-      picture: stripped,
-    };
+      const updatedProfile = {
+        ...profile,
+        picture: stripped,
+      };
 
-    const res = await updateProfile(updatedProfile);
-    dispatch(setProfile(res));
-  } catch (err) {
-    console.error("Image upload failed", err);
-  }
-};
+      const res = await updateProfile(updatedProfile);
+      dispatch(setProfile(res));
+    } catch (err) {
+      console.error("Image upload failed", err);
+    }
+  };
 
+  const { hovered, ref } = useHover();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-
-// const getBase64 = (file: any) => {
-//   return new Promise<string>((resolve, reject) => {
-//     const reader = new FileReader();
-
-//     reader.readAsDataURL(file);
-
-//     reader.onload = () => resolve(reader.result as string);
-
-//     reader.onerror = (error) => reject(error);
-//   });
-// };
-
-
-const { hovered, ref } = useHover();
-const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-
-
-  // -------------------- UI --------------------
-
-
-  if (!user || !user.data) {
-    // User is logged out, render fallback
-    return <div className="text-5xl text-red-600 font-bold text-center">Please log in to view your profile</div>;
+  // ✅ Correct login check
+  if (!user || !user.id) {
+    return (
+      <div className="text-5xl text-red-600 font-bold text-center">
+        Please log in to view your profile
+      </div>
+    );
   }
 
   return (
     <div className="w-4/5 mx-auto">
       {/* HEADER */}
       <div className="relative">
-        {/* Banner */}
-        <img className="rounded-t-2xl" src="/Profile/banner.jpg" alt="Profile banner" />
+        <img
+          className="rounded-t-2xl"
+          src="/Profile/banner.jpg"
+          alt="Profile banner"
+        />
 
         <div
-  ref={ref}
-  className="absolute -bottom-1/3 left-3 flex items-center justify-center group cursor-pointer"
-  onClick={() => fileInputRef.current?.click()}
->
-  <Avatar
-    className="!w-48 !h-48 border-mine-shaft-950 border-8 rounded-full"
-    src={
-    profile?.picture
-      ? `data:image/png;base64,${profile.picture}`
-      : "/Avatar.png"
-  }
-    alt="Profile avatar"
-  />
+          ref={ref}
+          className="absolute -bottom-1/3 left-3 flex items-center justify-center group cursor-pointer"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Avatar
+            className="!w-48 !h-48 border-mine-shaft-950 border-8 rounded-full"
+            src={
+              profile?.picture
+                ? `data:image/png;base64,${profile.picture}`
+                : "/Avatar.png"
+            }
+            alt="Profile avatar"
+          />
 
-  {/* Overlay */}
-  <Overlay
-    className="!rounded-full opacity-0 group-hover:opacity-75 transition-opacity"
-    color="#000"
-    backgroundOpacity={0.75}
-  />
+          <Overlay
+            className="!rounded-full opacity-0 group-hover:opacity-75 transition-opacity"
+            color="#000"
+            backgroundOpacity={0.75}
+          />
 
-  {/* Edit icon */}
-  <IconEdit className="absolute z-[300] !w-16 !h-16 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+          <IconEdit className="absolute z-[300] !w-16 !h-16 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
 
-  {/* Hidden File Input */}
-  <input
-  ref={fileInputRef}
-  type="file"
-  accept="image/png,image/jpeg"
-  className="hidden"
-  onChange={(e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileChange(file);
-    }
-  }}
-/>
-</div>
-
-      
-       
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                handleFileChange(file);
+              }
+            }}
+          />
+        </div>
       </div>
 
-
-      {/* INFO*/}
-
-      <Info name={user.data.name} />
+      {/* INFO */}
+      {/* ✅ Use profile instead of user */}
+      <Info name={profile?.name || "Loading..."} />
 
       <Divider my="xl" />
 
@@ -225,7 +199,7 @@ const fileInputRef = useRef<HTMLInputElement | null>(null);
 
       {/* CERTIFICATIONS */}
       <Certifications />
- </div> 
+    </div>
   );
 };
 

@@ -77,10 +77,10 @@ const navigate = useNavigate();
               dispatch(setJwt(res.jwt));
               const decoded: any = jwtDecode(res.jwt);
 
-// ✅ store token
+
 localStorage.setItem("token", res.jwt);
 
-// ✅ update redux user instantly
+
 dispatch(setUser({
   id: decoded.id,
   email: decoded.sub
@@ -121,7 +121,7 @@ dispatch(setUser({
           overlayProps={{ radius: 'sm', blur: 2 }}
           loaderProps={{ color: 'yellow.4', type: 'bars' }}
         />
-  <div className="w-1/2 px-20 flex flex-col justify-center gap-3">
+  <div className="w-1/2 sm-mx:w-full px-20 bs-ms:px-10 md-mx:px-5 flex flex-col justify-center gap-3">
         <div className="text-2xl font-semibold">Login</div>
         
         <TextInput

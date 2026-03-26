@@ -118,7 +118,7 @@ const SignUp=()=>{
             className="translate-x-1/2"
             overlayProps={{ radius: 'sm', blur: 2 }}
             loaderProps={{ color: 'yellow.4', type: 'bars' }}
-          /> <div className="w-1/2 px-20 flex flex-col justify-center gap-3">
+          /> <div className="w-1/2 px-20 sm-mx:w-full bs-ms:px-10 md-mx:px-5 flex flex-col justify-center gap-3">
         <div className="text-2xl font-semibold">Create Account</div>
         <TextInput
         withAsterisk

@@ -145,9 +145,9 @@ const JobDesc =(props:any)=>{
             </div>
             
               
-              <Link to={`/company/${props.company}`}>
+              {/* <Link to={`/company/${props.company}`}>
               <Button color="yellow.5" size="sm" variant="light">Company Page</Button>
-              </Link>
+              </Link> */}
               </div> 
               <div className="text-mine-shaft-300 text-justify">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla quos fugit aliquid corrupti debitis natus quaerat ut iste veniam a temporibus est qui deserunt animi ipsa saepe, dolor assumenda velit Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem, maxime?</div>
               </div>

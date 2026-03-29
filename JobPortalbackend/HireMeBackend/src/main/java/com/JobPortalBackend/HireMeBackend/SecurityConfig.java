@@ -34,7 +34,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/login",
+                                "/users/login",
                                 "/users/register",
+                                "/users/changePass",
                                 "/users/verifyOtp/**",
                                 "/users/sendOtp/**"
                         ).permitAll()

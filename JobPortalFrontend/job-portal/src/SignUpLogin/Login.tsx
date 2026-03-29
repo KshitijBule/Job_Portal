@@ -10,8 +10,9 @@ import ResetPassword from "./ResetPasword";
 import { useDispatch } from "react-redux";
 import { setUser } from "../Slices/UserSlice";
 import { setJwt } from "../Slices/JwtSlice";
-import { loginUser } from "../Services/AuthService";
+
 import { jwtDecode } from "jwt-decode";
+import { loginUser } from "../Services/UserService";
 
 const form={
     email:"",
@@ -99,7 +100,7 @@ dispatch(setUser({
 
         notifications.show({
           title: "Login Failed",
-          message: err.response.data.errorMessage,
+          message: err.response?.data?.errorMessage || "Something went wrong, please try again",
           color: "red",
           icon:<IconX style={{width:"90%",height:"90%"}}/>,
           withCloseButton: true,

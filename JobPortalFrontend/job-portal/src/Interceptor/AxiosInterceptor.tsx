@@ -1,7 +1,7 @@
 import axios, { InternalAxiosRequestConfig } from "axios";
 
 const axiosInstance = axios.create({
-    baseURL: 'https://job-portal-knk1.onrender.com'
+    baseURL: 'https://job-portal-2-xd3f.onrender.com'
 });
 
 axiosInstance.interceptors.request.use(

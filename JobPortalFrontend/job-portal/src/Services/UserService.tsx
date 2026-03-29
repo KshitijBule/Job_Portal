@@ -1,6 +1,6 @@
 import axiosInstance from "../Interceptor/AxiosInterceptor";
 
-const base_url="http://localhost:8080/users/"
+
 
 
 
@@ -20,7 +20,7 @@ const loginUser=async (login:any)=>{
   console.log(res);        // full axiosInstance response
   console.log(res.data);   // backend message
   console.log(res.status);
-   return res;
+   return res.data;
 })
   .catch(error=>{throw error;});
 }

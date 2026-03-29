@@ -1,21 +1,20 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getItem, removeItem, setItem } from "../Services/LocalStorageService";
 
-const UserSlice=createSlice({
-  name:"user",
-  initialState:getItem("user"),
-  reducers:{
-    setUser:(state,action)=>{
-      setItem("user",action.payload);
-      state=getItem("user");
-      return state;
-    },
-    removeUser:(state)=>{
-      removeItem("user");
-      state=null;
-      return state;    
+// UserSlice.ts - main fix here
+const UserSlice = createSlice({
+    name: "user",
+    initialState: getItem("user") || null, // ✅ fallback to null, never undefined
+    reducers: {
+        setUser: (_state, action) => {
+            setItem("user", action.payload);
+            return action.payload; // ✅ return directly, don't re-read from storage
+        },
+        removeUser: () => {
+            removeItem("user");
+            return null; // ✅ return null, not ""
+        }
     }
-  }
 });
 
 export const {setUser, removeUser}= UserSlice.actions;

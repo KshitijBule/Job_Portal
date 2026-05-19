@@ -129,57 +129,6 @@ cd HireMe
 
 ---
 
-# Backend Setup
-
-## Configure MongoDB
-
-Add your MongoDB URI inside:
-
-```properties
-src/main/resources/application.properties
-```
-
-```properties
-spring.data.mongodb.uri=YOUR_MONGODB_URI
-```
-
-## Run Backend
-
-```bash
-mvn spring-boot:run
-```
-
-Backend will start at:
-
-```text
-http://localhost:8080
-```
-
----
-
-# Frontend Setup
-
-## Install Dependencies
-
-```bash
-npm install
-```
-
-## Start Frontend
-
-```bash
-npm run dev
-```
-
-Frontend will start at:
-
-```text
-http://localhost:5173
-```
-
----
-
-# API Endpoints
 
 ## Authentication APIs
 
